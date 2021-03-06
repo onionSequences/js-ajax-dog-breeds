@@ -56,12 +56,14 @@ select.addEventListener("change", function (e) {
 select.addEventListener("mouseover", function () {
   var h1 = document.querySelector("h1");
   h1.textContent = "Woof Woof";
+  // stop interval
   clearInterval(timer);
 });
 
 select.addEventListener("mouseleave", function () {
   var h1 = document.querySelector("h1");
   h1.innerHTML = "&#128062 Select your favorite breed &#128062";
+  // Start interval again
   timer = setInterval(() => {
     getBreed(breed, createDogImage);
   }, 5000);
@@ -95,9 +97,9 @@ function createDogImage(url) {
   }
 }
 
-getBreed(breed, createDogImage); // Inital create image on page load
-
 // Change image on 5 s
 timer = setInterval(() => {
   getBreed(breed, createDogImage);
 }, 5000);
+
+getBreed(breed, createDogImage); // Inital create image on page load
