@@ -44,50 +44,44 @@
 
 // Set interval, which should, every 5 seconds, send request
 
-var breed = document.querySelector("option").value;
-var select = document.querySelector("select");
-var timer = null;
+const select = document.querySelector("select");
+let timer = null;
 
-select.addEventListener("change", function (e) {
-  breed = e.target.value;
-  return getBreed(breed, createDogImage); // When value is changed we want picture of that breed
-});
+const fetchData = async url => {
+  try {
+    const request = await fetch(url);
+    const json = await request.json();
+    if (json.status === "success") return json.message;
+  } catch (error) {
+    return console.error(error);
+  }
+};
 
-select.addEventListener("mouseover", function () {
-  var h1 = document.querySelector("h1");
-  h1.textContent = "Woof Woof";
-  // stop interval
-  clearInterval(timer);
-});
-
-select.addEventListener("mouseleave", function () {
-  var h1 = document.querySelector("h1");
-  h1.innerHTML = "&#128062 Select your favorite breed &#128062";
-  // Start interval again
-  timer = setInterval(() => {
-    getBreed(breed, createDogImage);
-  }, 5000);
-});
-
-function getBreed(breed, createDogImage) {
-  var request = new XMLHttpRequest();
-  var requestUrl = "https://dog.ceo/api/breed/" + breed + "/images/random";
-
-  request.open("GET", requestUrl);
-
-  request.onload = function () {
-    if (request.status === 200 || request.status === 201) {
-      var getUrl = JSON.parse(request.responseText).message;
-      createDogImage(getUrl);
+const listAllBreeds = async () => {
+  await fetchData("https://dog.ceo/api/breeds/list/all").then(breeds => {
+    for (const property in breeds) {
+      let option = document.createElement("option");
+      option.value = property;
+      option.textContent = property.charAt(0).toUpperCase() + property.slice(1);
+      select.append(option);
     }
-  };
-  request.send();
-}
+  });
+};
 
-function createDogImage(url) {
-  var body = document.querySelector("body");
-  var img = document.createElement("img");
-  var getImg = document.querySelector("img");
+const fetchDogImg = async () => {
+  await listAllBreeds();
+  let activeBreed = select.value;
+
+  const dogImgUrl = await fetchData(
+    "https://dog.ceo/api/breed/" + activeBreed + "/images/random"
+  );
+  createDogImage(dogImgUrl);
+};
+
+const createDogImage = url => {
+  const body = document.querySelector("body");
+  const img = document.createElement("img");
+  const getImg = document.querySelector("img");
 
   if (!getImg) {
     img.setAttribute("src", url);
@@ -95,11 +89,12 @@ function createDogImage(url) {
   } else {
     getImg.setAttribute("src", url);
   }
-}
+};
 
-// Change image on 5 s
+select.addEventListener("change", () => fetchDogImg());
+
 timer = setInterval(() => {
-  getBreed(breed, createDogImage);
+  fetchDogImg();
 }, 5000);
 
-getBreed(breed, createDogImage); // Inital create image on page load
+fetchDogImg();
