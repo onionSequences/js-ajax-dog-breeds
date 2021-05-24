@@ -69,7 +69,6 @@ const listAllBreeds = async () => {
 };
 
 const fetchDogImg = async () => {
-  await listAllBreeds();
   let activeBreed = select.value;
 
   const dogImgUrl = await fetchData(
@@ -97,4 +96,7 @@ timer = setInterval(() => {
   fetchDogImg();
 }, 5000);
 
-fetchDogImg();
+window.addEventListener("load", async () => {
+  await listAllBreeds();
+  await fetchDogImg();
+});
